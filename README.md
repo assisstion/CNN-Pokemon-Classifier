@@ -29,6 +29,16 @@ To run the code, use `python3`, and ensure the following packages are installed:
 
 `scikit-learn`
 
+`pillow`
+
+`scikit-image`
+
+`python-socketio`
+
+`aiohttp`
+
+`socketIO-client`
+
 There have been some issues with loading the models in the `anaconda` environment due to serialization, but packages installed with `pip3` should work fine. If an issue occurs, one can always retrain the models by running ``` python3 cnn.py ```
 
 # Running the code

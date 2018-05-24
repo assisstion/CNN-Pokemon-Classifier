@@ -6,7 +6,7 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 import os, random
 import sys
-from queue import Queue
+from guidata import pd, random_sprite
 
 # -----------
 # remove these lines if code not working
@@ -19,30 +19,6 @@ from preprocess import types, get_pokemon
 from run import load_models, load_image, run, predict_single
 
 import events
-
-class GUIData:
-    #Attrs:
-    #pd.AI_answer
-    #pd.AI_counter
-    #pd.classifier
-    #pd.name_txt
-    #pd.player_counter
-    #pd.pokemon_id
-    #pd.prediction
-    #pd.test_set
-    #pd.type_labels
-    #pd.window
-    #pd.multi
-    #pd.net
-    pass
-
-class NetData:
-    #pd.net.queue
-    #pd.net.last_item
-    pass
-
-pd = GUIData()
-pd.net = NetData()
 
 # determines the outcome of a click
 def clicked(correct_type):
@@ -57,18 +33,6 @@ def clicked(correct_type):
         labels()
     if pd.multi:
         pd.net.queue.put((pd.net.round_num, correct_type, events.current_time() - pd.net.start_time))
-
-
-def random_sprite():
-    path = "data/main-sprites/"
-
-    game_vers = random.choice(os.listdir(path))
-    while str(game_vers).endswith('.DS_Store'):
-        game_vers = random.choice(os.listdir(path))
-    img = random.choice(os.listdir(path + game_vers))
-    while not str(img).endswith('png'):
-        img = random.choice(os.listdir(path + game_vers))
-    return (path + game_vers + '/' + img, img)
 
 # Picks a random next pokemon to be guessed
 def next_pokemon():
@@ -137,11 +101,7 @@ def labels():
     btn3.place(x=200, y=200, anchor="center")
     btn4.place(x=200, y=250, anchor="center")
 
-
 def gui():
-    if pd.multi:
-        pd.net.queue = Queue()
-
     window = Tk()
     pd.window = window
     pd.window.title("Pokemon Classification Game")

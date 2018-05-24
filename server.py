@@ -10,12 +10,14 @@ import multi
 import threading
 import client
 import operator
-from GUI import random_sprite
+import os
+from guidata import random_sprite
 
 class ServerDB:
     #db.scores
     #db.item
     def __init__(self):
+        print("server started")
         self.round_num = 0
         self.game_round = {}
         self.scores = {}
@@ -34,7 +36,8 @@ class ServerDB:
 
     async def send_item(self):
         print("sending item ", self.item)
-        await sio.emit('request_item', self.item)
+        #await sio.emit('request_item', self.item)
+        multi.push_event('emit', ['reply', self.item])
 
     async def countdown_loop(self):
         print('starting countdown loop')
@@ -65,7 +68,7 @@ class ServerDB:
             high = max([val for kx, val in self.scores.items() if kx != key], default = 0)
             scores["high"] = high
             scores["self"] = self.scores[key]
-            await sio.emit('update_score', scores, room=key)
+            multi.push_event('emit_room', ['update_score', scores, key])
         self.update_item()
         await self.send_item()
 
@@ -75,7 +78,7 @@ class ServerDB:
 
 db = ServerDB()
 
-sio = socketio.AsyncServer()
+sio = socketio.AsyncServer(logger=True)
 app = web.Application()
 sio.attach(app)
 
@@ -100,6 +103,7 @@ async def message(sid, data):
 @sio.on('game_start', namespace='/chat')
 async def game_start(sid, data):
     db.start_game()
+    await db.countdown_loop()
     #await db.send_item()
 
 #@sio.on('request_item', namespace='/chat')
@@ -134,13 +138,30 @@ class MultiWebApp(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        asyncio.ensure_future(db.countdown_loop())
-        web.run_app(app)
+    	pass
+        #loop = asyncio.new_event_loop()
+        #asyncio.set_event_loop(loop)
+        #asyncio.ensure_future(db.countdown_loop())
+        #web.run_app(app)
+
+def run_app(loop):
+    guidata.pd.multi = True
+    runner = web.AppRunner(app)
+    multi.run_app(app, loop)
+    print("server setup done")
+    pass
+
+def start_child():
+    asyncio.ensure_future(db.countdown_loop())
+    web.run_app(app)
 
 if __name__ == '__main__':
-    t = MultiWebApp()
-    t.daemon = True
-    t.start()
-    client.start_client('127.0.0.1', 8080, True)
+    t2 = MultiWebApp()
+    t2.daemon = True
+    t2.start()
+    loop = asyncio.get_event_loop()
+    #run_app(loop)
+    asyncio.ensure_future(db.countdown_loop())
+    web.run_app(app)
+    client.start_client('127.0.0.1', 8080, True, loop)
+   
