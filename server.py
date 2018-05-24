@@ -10,7 +10,7 @@ import multi
 import threading
 import client
 import operator
-from GUI import random_sprite
+from guidata import random_sprite
 
 class ServerDB:
     #db.scores

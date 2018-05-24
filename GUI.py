@@ -7,6 +7,7 @@ from PIL import ImageTk, Image
 import os, random
 import sys
 from queue import Queue
+from guidata import random_sprite
 
 # -----------
 # remove these lines if code not working
@@ -57,18 +58,6 @@ def clicked(correct_type):
         labels()
     if pd.multi:
         pd.net.queue.put((pd.net.round_num, correct_type, events.current_time() - pd.net.start_time))
-
-
-def random_sprite():
-    path = "data/main-sprites/"
-
-    game_vers = random.choice(os.listdir(path))
-    while str(game_vers).endswith('.DS_Store'):
-        game_vers = random.choice(os.listdir(path))
-    img = random.choice(os.listdir(path + game_vers))
-    while not str(img).endswith('png'):
-        img = random.choice(os.listdir(path + game_vers))
-    return (path + game_vers + '/' + img, img)
 
 # Picks a random next pokemon to be guessed
 def next_pokemon():
