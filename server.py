@@ -130,17 +130,21 @@ def disconnect(sid):
 app.router.add_get('/', index)
 
 class MultiWebApp(threading.Thread):
-    def __init__(self):
+    def __init__(self, port):
         threading.Thread.__init__(self)
+        self.port = port
 
     def run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         asyncio.ensure_future(db.countdown_loop())
-        web.run_app(app)
+        web.run_app(app, port=self.port)
 
 if __name__ == '__main__':
-    t = MultiWebApp()
+    port = 8080
+    if len(sys.argv) >= 2:
+        port = sys.argv[1]
+    t = MultiWebApp(port)
     t.daemon = True
     t.start()
-    client.start_client('127.0.0.1', 8080, True)
+    client.start_client('127.0.0.1', port, True)
